@@ -6,7 +6,12 @@ Making a coding language for practice haven't decided on a theme yet
 --make math operations all one function call
 --make function call logic
 
-should be able to do all math operations(the pemdas ones anyways) by calling something like
-math(5 + 3 * 7);
+math operations will be called as follows:
 
-don't know if I'll call it math though
+addition
+    add(number,number);
+for other members of PEMDAS just change add for other operations words those being
+add,minus,mult,div,mod,exp
+
+concatenations is called as 
+    merge[thing#thing];
