@@ -6,7 +6,7 @@ grammar PLang;
 
 
 program returns [Program ast] :
-    f = functions { $ast = new Program($f.ast);}
+    f = function { $ast = new Program($f.ast);}
     |n = nominate { $ast = new Program($n.ast);}
     |o = output { $ast = new Program($p.ast);}
     |fo = fileopen { $ast = new Program($fo.ast);}
@@ -29,12 +29,42 @@ output returns [Output ast] :
     Print p=program { $ast = new Output($o.output);}
     ;
 
+fileopen returns [FileOpen ast] :
+    Open p=primitive f=function { $ast = new FileOpen($p.ast,$f.ast);}
+    ;
 
+filewrite returns [FileWrite ast] :
+    Write p=primitive f=function { $ast = new FileWrite($p.ast,$f.ast);}
+    ;
 
+fileappend returns [FileAppend ast] :
+    Append p=primitive f=function { $ast = new FileAppend($p.ast,$f.ast);}
+    ;
+
+fileread returns [FileRead ast] :
+    Read p=primitive f=function { $ast = new FileRead($p.ast,$f.ast);}
+    ;
+
+fileclose returns [FileClose ast] :
+    Close p=primitive f=function { $ast = new FileClose($p.ast,$f.ast);}
+    ;
+
+fileedit returns [FileEdit ast] :
+    Edit p=primitive f=function { $ast = new FileEdit($p.ast,$f.ast);}
+    ;
+
+compare returns [Compare ast] :
+    f1 = function op = ('<' | '>' | '==' | '!=' | '>=' | '<=') f2=function {$ast = new Compare($f1.ast,$op.text,$f2.ast);}
+    ;
 
 primitive returns [Primitive ast] :
     id=Identifier { $ast = new Primitive($id.text);}
     ;
+
+basic returns [Basic ast] :
+    n0 = Number {$ast = new Basic(Integer.parseInt($n0.text));}
+    |n0 = Number Dot n1 = Number {$ast = new Basic(Double.parseDouble($n0.text+"."+$n1.text));}
+;
 
 add returns [Add ast] :
     'add' '(' p1=program ',' p2=program ')' ';'{ $ast = new Add ($p1.ast,$p2.ast);}
@@ -64,9 +94,10 @@ concatenation returns [Concatenation ast] :
     'merge' '[' p1=program '#' p2=program ']'';' { $ast = new Concatenation ($p1.ast,$p2.ast);}
     ;
 
-functions returns [Functions ast] :
+function returns [Function ast] :
     p = primitive { $ast = $p.ast;}
     |s = string { $ast = $s.ast;}
+    |b = basic {$ast = $b.ast;}
     |a = add { $ast = $a.ast;}
     |su = subtract { $ast = $su.ast;}
     |m = multiply { $ast = $m.ast;}
@@ -80,11 +111,11 @@ functions returns [Functions ast] :
  Input: 'insert';
  Delete: 'delete';
  Open: 'openfile';
- FileWrite: 'writefile';
- FileRead: 'readfile';
- AppendFile: 'appendfile';
- FileClose: 'closefile';
- FileEdit: 'editfile';
+ Write: 'writefile';
+ Read: 'readfile';
+ Append: 'appendfile';
+ Close: 'closefile';
+ Edit: 'editfile';
  If: 'if';
  For: 'for';
  While: 'while';
