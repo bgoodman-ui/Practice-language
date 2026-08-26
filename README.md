@@ -15,3 +15,15 @@ add,minus,mult,div,mod,exp
 
 concatenations is called as 
     merge[thing#thing];
+
+loop syntax
+
+if equivalent
+    case
+for equivalent
+    each
+while equivalent
+    when
+
+delete equivalent
+    remove

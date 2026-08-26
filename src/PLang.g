@@ -15,10 +15,11 @@ program returns [Program ast] :
     |fa = fileappend { $ast = new Program ($fa.ast);}
     |fe = fileedit { $ast = new Program ($fe.ast);}
     |fc = fileclose { $ast = new Program ($fc.ast);}
-    |i = if { $ast = new Program ($i.ast);}
-    |f = for {$ast = new Program ($f.ast);}
-    |w = while { $ast = new Program ($w.ast);}
-    |d = delete { $ast = new Program ($d.ast);}
+    |c = case { $ast = new Program ($c.ast);}
+    |e = each {$ast = new Program ($e.ast);}
+    |w = when { $ast = new Program ($w.ast);}
+    |co = conditional {$ast = new Program ($co.ast);}
+    |r = remove { $ast = new Program ($r.ast);}
     ;
 
 nominate returns [Nominate ast] :
@@ -56,6 +57,50 @@ fileedit returns [FileEdit ast] :
 compare returns [Compare ast] :
     f1 = function op = ('<' | '>' | '==' | '!=' | '>=' | '<=') f2=function {$ast = new Compare($f1.ast,$op.text,$f2.ast);}
     ;
+
+case returns [Case ast] locals [ArrayList<Program> body] :
+    {$body = new ArrayList<Program>();}
+    If '(' f = function ')' '{' 
+    (p = program {$body.add($p.ast);} )* 
+    '}' {$ast = new Case($f.ast,$body);}
+    |{$body = new ArrayList<Program>();}
+    If '(' cm = compare ')' '{' 
+    (p = program {$body.add($p.ast);} )* 
+    '}' {$ast = new Case($cm.ast,$body);}
+    ;
+
+each returns [Each ast] locals [ArrayList<Program> body] :
+    {$body = new ArrayList<Program>();}
+    For '(' n=nominate ';' f1=function ';' f2=nominate ')' '{'
+    (p = program {$body.add($p.ast);} )* 
+    '}' {$ast = new Each($n.ast,$f1.ast,$f2.ast);}
+    |{$body = new ArrayList<Program>();}
+    For '(' n=nominate ';' cm=compare ';' f2=nominate ')' '{'
+    (p = program {$body.add($p.ast);} )* 
+    '}' {$ast = new Each($n.ast,$cm.ast,$f2.ast);}
+    ;
+
+when returns [When ast] locals [ArrayList<Program> body] :
+    {$body = new ArrayList<Program>();}
+    While '(' f = function ')' '{' 
+    (p = program {$body.add($p.ast);} )* 
+    '}' {$ast = new When($f.ast,$body);}
+    |{$body = new ArrayList<Program>();}
+    While '(' cm = compare ')' '{' 
+    (p = program {$body.add($p.ast);} )* 
+    '}' {$ast = new When($cm.ast,$body);}
+    ;
+
+conditional returns [Conditional ast] :
+    TrueLiteral {$ast = new Conditional(true);}
+    |FalseLiteral {$ast = new Conditional(false);}
+    ;
+
+remove returns [Remove ast] :
+    Delete f=function {$ast = new Remove($f.ast);}
+    ;
+    
+
 
 primitive returns [Primitive ast] :
     id=Identifier { $ast = new Primitive($id.text);}
@@ -109,16 +154,16 @@ function returns [Function ast] :
 
  Print: 'print';
  Input: 'insert';
- Delete: 'delete';
+ Delete: 'remove';
  Open: 'openfile';
  Write: 'writefile';
  Read: 'readfile';
  Append: 'appendfile';
  Close: 'closefile';
  Edit: 'editfile';
- If: 'if';
- For: 'for';
- While: 'while';
+ If: 'case';
+ For: 'each';
+ While: 'when';
 TrueLiteral: 'true';
 FalseLiteral: 'false';
 Equals : '==';
